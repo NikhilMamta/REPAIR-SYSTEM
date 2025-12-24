@@ -37,6 +37,10 @@ const MakePayment = () => {
     toBePaidAmount: "",
   });
 
+  // State for hover preview
+  const [hoveredDoc, setHoveredDoc] = useState(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
   // const filteredTasks = tasks.filter(
   //   (task) => user?.role === "admin" || task.nameOfIndenter === user?.name
   // );
@@ -330,8 +334,85 @@ const MakePayment = () => {
 
 
 
+  const handleMouseEnter = (e, url) => {
+    // Convert Google Drive 'view' links to 'preview' for better embedding
+    let previewUrl = url;
+    if (url.includes('drive.google.com') && url.includes('/view')) {
+      previewUrl = url.replace('/view', '/preview');
+    }
+    setHoveredDoc(previewUrl);
+    setMousePos({ x: e.clientX, y: e.clientY });
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "-";
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
+    return date.toLocaleString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
+  const handleMouseMove = (e) => {
+    setMousePos({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleMouseLeave = () => {
+    setHoveredDoc(null);
+  };
+
   return (
     <div className="space-y-6">
+      {/* Hover Preview Tooltip */}
+      {/* Hover Preview Tooltip */}
+      {hoveredDoc && (
+        <div
+          style={{
+            position: 'fixed',
+            top: mousePos.y + 15,
+            left: mousePos.x + 15,
+            zIndex: 9999,
+            width: '200px', // Increased slightly for better visibility
+            height: '200px',
+            backgroundColor: 'white',
+            border: '1px solid #e5e7eb',
+            borderRadius: '0.5rem',
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+          className="pointer-events-none"
+        >
+          {hoveredDoc.includes('drive.google.com') ? (
+            <iframe
+              src={hoveredDoc}
+              title="Document Preview"
+              className="w-full h-full border-none bg-gray-50"
+              sandbox="allow-scripts allow-same-origin allow-popups"
+            />
+          ) : /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(hoveredDoc) ? (
+            <img
+              src={hoveredDoc}
+              alt="Preview"
+              className="max-w-full max-h-full object-contain"
+            />
+          ) : (
+            <iframe
+              src={hoveredDoc}
+              title="Document Preview"
+              className="w-full h-full border-none bg-gray-50"
+              sandbox="allow-scripts allow-same-origin allow-popups"
+            />
+          )}
+        </div>
+      )}
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-gray-900">Repair Advance</h1>
       </div>
@@ -495,7 +576,7 @@ const MakePayment = () => {
                         className="flex items-center"
                       >
                         <Package className="w-3 h-3 mr-1" />
-                        Material
+                        Update
                       </Button>
                     </TableCell>
                     <TableCell className="font-medium text-blue-600">
@@ -504,7 +585,9 @@ const MakePayment = () => {
                     <TableCell>{task.machineName}</TableCell>
                     <TableCell>{task.serialNo}</TableCell>
 
-                    <TableCell>{task.planned2}</TableCell>
+                    <TableCell className="min-w-[150px]">
+                      {formatDate(task.planned2)}
+                    </TableCell>
                     <TableCell>{task.doerName}</TableCell>
                     <TableCell>{task.vendorName || "-"}</TableCell>
                     <TableCell>{task.leadTimeToDeliverDays}</TableCell>
@@ -512,7 +595,23 @@ const MakePayment = () => {
 
                     <TableCell>{task.howMuch || "-"}</TableCell>
 
-                    <TableCell>{task.billImage || "-"}</TableCell>
+                    <TableCell>
+                      {task.billImage ? (
+                        <a
+                          href={task.billImage}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline"
+                          onMouseEnter={(e) => handleMouseEnter(e, task.billImage)}
+                          onMouseMove={handleMouseMove}
+                          onMouseLeave={handleMouseLeave}
+                        >
+                          View Image
+                        </a>
+                      ) : (
+                        "-"
+                      )}
+                    </TableCell>
                     <TableCell>{task.billNo || "-"}</TableCell>
                     <TableCell>
                       ₹{task.totalBillAmount?.toLocaleString() || "-"}
@@ -725,12 +824,13 @@ const MakePayment = () => {
                 <option value="Cash">Cash</option>
                 <option value="Cheque">Cheque</option>
                 <option value="Credit Card">Credit Card</option>
+                <option value="UPI Payment">UPI Payment</option>
               </select>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                To Be Paid Amount *
+                Payment Amount *
               </label>
               <input
                 type="number"

@@ -323,7 +323,7 @@ const CheckMachine = () => {
                         className="flex items-center"
                       >
                         <CheckCircle className="w-3 h-3 mr-1" />
-                        Material
+                        Update
                       </Button>
                     </TableCell>
                     <TableCell className="font-medium text-blue-600">
