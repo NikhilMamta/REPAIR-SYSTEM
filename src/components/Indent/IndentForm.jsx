@@ -16,7 +16,6 @@ const IndentForm = ({ onSubmit, onCancel, taskList }) => {
 
   // Form field states
   const [selectedMachine, setSelectedMachine] = useState("");
-  const [filteredSerials, setFilteredSerials] = useState([]);
   const [filteredDepartment, setFilteredDepartment] = useState([]);
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [selectedWard, setSelectedWard] = useState("");
@@ -32,7 +31,7 @@ const IndentForm = ({ onSubmit, onCancel, taskList }) => {
   const [availableFrequencies, setAvailableFrequencies] = useState([]);
 
   // Other form states
-  const [selectedSerialNo, setSelectedSerialNo] = useState("");
+  const [selectedCompanyName, setSelectedCompanyName] = useState("");
   const [selectedGivenBy, setSelectedGivenBy] = useState("");
   const [selectedDoerName, setSelectedDoerName] = useState("");
   const [selectedTaskType, setSelectedTaskType] = useState("Select Task Type");
@@ -45,6 +44,7 @@ const IndentForm = ({ onSubmit, onCancel, taskList }) => {
 
   // Loading states
   const [loaderSheetData, setLoaderSheetData] = useState(false);
+  const [companyNameData, setCompanyNameData] = useState([]);
   const [loaderSubmit, setLoaderSubmit] = useState(false);
   const [loaderMasterSheetData, setLoaderMasterSheetData] = useState(false);
 
@@ -148,6 +148,7 @@ const IndentForm = ({ onSubmit, onCancel, taskList }) => {
         const allDoers = [];
         const allDepartments = [];
         const allWards = [];
+        const allCompanies = [];
 
         formattedRows.forEach((item) => {
           // Extract Doer Name (check multiple possible column names)
@@ -167,12 +168,19 @@ const IndentForm = ({ onSubmit, onCancel, taskList }) => {
           if (wardValue && wardValue.trim() !== "") {
             allWards.push(wardValue.trim());
           }
+
+          // Extract Company Name
+          const companyValue = item["Company Name"] || "";
+          if (companyValue && companyValue.trim() !== "") {
+            allCompanies.push(companyValue.trim());
+          }
         });
 
         // Remove duplicates and set states
         setDoerName([...new Set(allDoers)]);
         setDepartmentData([...new Set(allDepartments)]);
         setWardsData([...new Set(allWards)].sort());
+        setCompanyNameData([...new Set(allCompanies)]);
 
         console.log("Extracted data:", {
           doers: [...new Set(allDoers)],
@@ -220,7 +228,7 @@ const IndentForm = ({ onSubmit, onCancel, taskList }) => {
       });
     }, 60000);
 
-    fetchSheetData();
+    // fetchSheetData(); // Commented out to fix the "getDataRange" error reported
     fetchMasterSheetData();
 
     // Cleanup timer on unmount
@@ -274,17 +282,54 @@ const IndentForm = ({ onSubmit, onCancel, taskList }) => {
   }, [startDate, endDate]);
 
   const uploadFileToDrive = async (file) => {
-    return new Promise((resolve) => {
-      // Simulated file upload
-      setTimeout(() => {
-        console.log("File upload simulated:", file.name);
-        resolve(`https://example.com/uploads/${Date.now()}_${file.name}`);
-      }, 1000);
+    const reader = new FileReader();
+    const SUBMISSION_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw_906PqOc36llVEHDqBd7bjm4Nj-Xv8VtTG-ODKld2wz4oA_-DL9J6WyD2Ur3mFbfHrw/exec";
+    const FOLDER_ID = "1IcQijNpCDjOI_HcMMeAiQHIbxO8pwmGZ";
+
+    return new Promise((resolve, reject) => {
+      reader.onload = async () => {
+        const base64Data = reader.result;
+
+        try {
+          const res = await fetch(SUBMISSION_SCRIPT_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams({
+              action: "uploadFile",
+              base64Data: base64Data,
+              fileName: file.name,
+              mimeType: file.type,
+              folderId: FOLDER_ID,
+            }).toString(),
+          });
+
+          const data = await res.json();
+
+          if (data.success && data.fileUrl) {
+            resolve(data.fileUrl);
+          } else {
+            toast.error("❌ File upload failed");
+            resolve("");
+          }
+        } catch (err) {
+          console.error("Upload error:", err);
+          toast.error("❌ Upload failed due to network error");
+          resolve("");
+        }
+      };
+
+      reader.onerror = () => {
+        reject("❌ Failed to read file");
+      };
+
+      reader.readAsDataURL(file);
     });
   };
 
   const clearFormState = () => {
-    setSelectedSerialNo("");
+    setSelectedCompanyName("");
     setSelectedMachine("");
     setSelectedGivenBy("");
     setSelectedDoerName("");
@@ -305,27 +350,17 @@ const IndentForm = ({ onSubmit, onCancel, taskList }) => {
     setTemperature("");
 
     setUserManualFile(null);
-    setFilteredSerials([]);
   };
 
   const handleSubmitForm = async (e) => {
     e.preventDefault();
 
-    // Basic validation - end date/time are optional
+    const SUBMISSION_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw_906PqOc36llVEHDqBd7bjm4Nj-Xv8VtTG-ODKld2wz4oA_-DL9J6WyD2Ur3mFbfHrw/exec";
+
+    // Basic validation
     if (!selectedMachine || !selectedDoerName || !selectedWard) {
       toast.error("❌ Please fill in all required fields");
       return;
-    }
-
-    // Optional: Validate that end date/time are not before start date/time
-    if (endTaskDate && startDate) {
-      const start = new Date(`${startDate}T${startTime}`);
-      const end = new Date(`${endTaskDate}T${endTime}`);
-
-      if (end < start) {
-        toast.error("❌ End date/time cannot be before start date/time");
-        return;
-      }
     }
 
     try {
@@ -337,36 +372,66 @@ const IndentForm = ({ onSubmit, onCancel, taskList }) => {
         userManualUrl = await uploadFileToDrive(userManualFile);
       }
 
-      // Prepare task data - end date/time are optional
-      const taskData = {
-        "Time Stamp": new Date().toLocaleString("en-IN", {
-          timeZone: "Asia/Kolkata",
-        }),
-        "Serial No": selectedSerialNo || "N/A",
+      // Generate Task Number (TR-XXX)
+      const lastTaskNo = taskList
+        .filter(task => task.taskNo?.startsWith("TR-"))
+        .map(task => parseInt(task.taskNo.replace("TR-", ""), 10))
+        .filter(num => !isNaN(num))
+        .sort((a, b) => b - a)[0] || 0;
+
+      const nextTaskNo = `TR-${String(lastTaskNo + 1).padStart(3, "0")}`;
+
+      const now = new Date();
+      const day = String(now.getDate()).padStart(2, '0');
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const year = now.getFullYear();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      const formattedTimestamp = `${day}/${month}/${year}, ${hours}:${minutes}:${seconds}`;
+
+      const payload = {
+        action: "insert1",
+        sheetName: "Repair System",
+        "Time Stemp": formattedTimestamp,
+        "Task No": "", // Blank for auto-formula in Column B
+        "Company Name ": selectedCompanyName || "N/A", // Matches exact header in Column C
         "Machine Name": selectedMachine,
+        "Machine Part Name": machinePartName || "N/A",
         "Given By": selectedGivenBy || "N/A",
         "Doer Name": selectedDoerName,
+        "Problem With Machine": description,
         "Enable Reminders": "No",
         "Require Attachment": "No",
         "Task Start Date": startDate && startTime ? `${startDate} ${startTime}:00` : "",
         "Task Ending Date": endTaskDate && endTime ? `${endTaskDate} ${endTime}:00` : "Not specified",
-        "Problem With Machine": description,
-        Department: selectedDepartment,
-        "Ward": selectedWard,
-        "Machine Part Name": machinePartName,
-        "Image Link": userManualUrl || "link not available",
         Priority: selectedPriority || "Medium",
+        Department: selectedDepartment || "N/A",
+        Ward: selectedWard,
+        "Image Link": userManualUrl || "link not available",
       };
 
-      console.log("Submitting task data:", taskData);
+      console.log("Submitting payload:", payload);
 
-      // Simulate API submission
-      setTimeout(() => {
+      const response = await fetch(SUBMISSION_SCRIPT_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams(payload).toString(),
+      });
+
+      const result = await response.json();
+      console.log("Submission result:", result);
+
+      if (result.success) {
         toast.success("✅ Task assigned successfully!");
         clearFormState();
         if (onSubmit) onSubmit();
         onCancel();
-      }, 1500);
+      } else {
+        toast.error("❌ Submission failed: " + (result.message || result.error));
+      }
 
     } catch (error) {
       console.error("❌ Submission failed:", error);
@@ -439,16 +504,6 @@ const IndentForm = ({ onSubmit, onCancel, taskList }) => {
             onChange={(e) => {
               const selected = e.target.value;
               setSelectedMachine(selected);
-              // Filter serials based on selected machine
-              const serials = masterRecords
-                .filter((item) => {
-                  const machineNameKey = Object.keys(item).find(key =>
-                    key.toLowerCase().includes("machine") || key.toLowerCase().includes("name")
-                  );
-                  return item[machineNameKey] === selected;
-                })
-                .map((item) => item["Serial No"] || "N/A");
-              setFilteredSerials([...new Set(serials.filter(Boolean))]);
             }}
             className="w-full py-2 rounded-md border border-gray-300 shadow-sm px-4 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             required
@@ -469,30 +524,28 @@ const IndentForm = ({ onSubmit, onCancel, taskList }) => {
           </select>
         </div>
 
-        {/* Serial No Dropdown */}
-        {selectedMachine && filteredSerials.length > 0 && (
-          <div>
-            <label
-              htmlFor="serialNo"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Serial Number
-            </label>
-            <select
-              id="serialNo"
-              value={selectedSerialNo}
-              onChange={(e) => setSelectedSerialNo(e.target.value)}
-              className="py-2 w-full rounded-md border border-gray-300 shadow-sm px-4 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="">Select Serial No (Optional)</option>
-              {filteredSerials.map((serial, idx) => (
-                <option key={idx} value={serial}>
-                  {serial}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
+        {/* Company Name Dropdown */}
+        <div>
+          <label
+            htmlFor="companyName"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Company Name
+          </label>
+          <select
+            id="companyName"
+            value={selectedCompanyName}
+            onChange={(e) => setSelectedCompanyName(e.target.value)}
+            className="py-2 w-full rounded-md border border-gray-300 shadow-sm px-4 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="">Select Company</option>
+            {companyNameData.map((company, idx) => (
+              <option key={idx} value={company}>
+                {company}
+              </option>
+            ))}
+          </select>
+        </div>
 
         {/* Doer's Name */}
         <div>

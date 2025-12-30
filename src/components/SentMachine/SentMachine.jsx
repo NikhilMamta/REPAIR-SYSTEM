@@ -32,6 +32,8 @@ const SentMachine = () => {
     paymentType: "",
     advancePayment: "",
   });
+  const [vendorData, setVendorData] = useState([]);
+  const [loaderMasterSheetData, setLoaderMasterSheetData] = useState(false);
 
   const filteredTasks = tasks.filter(
     (task) => user?.role === "admin" || task.nameOfIndenter === user?.name
@@ -66,6 +68,10 @@ const SentMachine = () => {
     "https://script.google.com/macros/s/AKfycbw_906PqOc36llVEHDqBd7bjm4Nj-Xv8VtTG-ODKld2wz4oA_-DL9J6WyD2Ur3mFbfHrw/exec";
   const SHEET_Id = "1wCjPAiyA1XKOSr4Q-VLjttIocU_eI1ZbbsKzEGt6lks";
   const FOLDER_ID = "1IcQijNpCDjOI_HcMMeAiQHIbxO8pwmGZ";
+
+  // Data fetching constants (matching IndentForm)
+  const DATA_FETCH_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz-wbRJYrSa2Fis-nYI0tivRS2Ns6rcXkGc18Wsib6P5Psea0ai8kJ_zPOSHP-oRU6J/exec";
+  const DATA_SHEET_ID = "16Hj4fUNqGaq6NnQlkFAXejfrA9NgpWAl3odmNW4SGcA";
 
   const fetchAllTasks = async () => {
     // console.log("selectedTaskType", selectedTaskType);
@@ -138,8 +144,48 @@ const SentMachine = () => {
     }
   };
 
+  const fetchMasterSheetData = async () => {
+    const SHEET_NAME = "Machines";
+    try {
+      setLoaderMasterSheetData(true);
+      const url = `${DATA_FETCH_SCRIPT_URL}?sheetId=${DATA_SHEET_ID}&sheet=${SHEET_NAME}`;
+
+      const res = await fetch(url);
+      const result = await res.json();
+
+      if (result.success && result.data) {
+        const headers = result.data[0];
+        const rows = result.data.slice(1);
+
+        const formattedRows = rows.map((row) => {
+          const rowData = {};
+          headers.forEach((header, colIndex) => {
+            const cleanHeader = header ? header.trim() : `Column_${colIndex}`;
+            rowData[cleanHeader] = row[colIndex] || "";
+          });
+          return rowData;
+        });
+
+        const allVendors = [];
+        formattedRows.forEach((item) => {
+          const vendorValue = item["Vendor Name"] || item["Add Vendor Name"] || "";
+          if (vendorValue && vendorValue.trim() !== "") {
+            allVendors.push(vendorValue.trim());
+          }
+        });
+
+        setVendorData([...new Set(allVendors)].sort());
+      }
+    } catch (err) {
+      console.error("Fetch error for Vendors:", err);
+    } finally {
+      setLoaderMasterSheetData(false);
+    }
+  };
+
   useEffect(() => {
     fetchAllTasks();
+    fetchMasterSheetData();
   }, []);
 
   const uploadFileToDrive = async (file) => {
@@ -323,10 +369,10 @@ const SentMachine = () => {
         </div>
 
         {activeTab === "pending" && (
-          <div>
-            <div className="relative">
-              <Table>
-                <TableHeader className="sticky top-0 z-10 bg-white">
+          <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-250px)]">
+            <Table>
+              <TableHeader className="sticky top-0 z-10">
+                <TableRow>
                   <TableHead>Action</TableHead>
                   <TableHead>Task Number</TableHead>
                   <TableHead>Planned Date</TableHead>
@@ -336,45 +382,45 @@ const SentMachine = () => {
                   <TableHead>Department</TableHead>
                   <TableHead>Part Name</TableHead>
                   <TableHead>Priority</TableHead>
-                </TableHeader>
-                <TableBody className="overflow-auto max-h-[calc(100vh-200px)] block">
-                  {pendingTasks.map((task) => (
-                    <TableRow key={task.taskNo}>
-                      <TableCell>
-                        <Button
-                          size="sm"
-                          onClick={() => handleSentClick(task)}
-                          className="flex items-center"
-                        >
-                          <Send className="w-3 h-3 mr-1" />
-                          Sent
-                        </Button>
-                      </TableCell>
-                      <TableCell className="font-medium text-blue-600">
-                        {task.taskNo}
-                      </TableCell>
-                      <TableCell>
-                        {new Date(task.taskStartDate).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>{task.machineName}</TableCell>
-                      <TableCell>{task.serialNo}</TableCell>
-                      <TableCell>{task.doerName}</TableCell>
-                      <TableCell>{task.department}</TableCell>
-                      <TableCell>{task.machinePartName}</TableCell>
-                      <TableCell>
-                        <span
-                          className={`px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(
-                            task.priority
-                          )}`}
-                        >
-                          {task.priority}
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {pendingTasks.map((task) => (
+                  <TableRow key={task.taskNo}>
+                    <TableCell>
+                      <Button
+                        size="sm"
+                        onClick={() => handleSentClick(task)}
+                        className="flex items-center"
+                      >
+                        <Send className="w-3 h-3 mr-1" />
+                        Sent
+                      </Button>
+                    </TableCell>
+                    <TableCell className="font-medium text-blue-600">
+                      {task.taskNo}
+                    </TableCell>
+                    <TableCell>
+                      {new Date(task.taskStartDate).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>{task.machineName}</TableCell>
+                    <TableCell>{task.serialNo}</TableCell>
+                    <TableCell>{task.doerName}</TableCell>
+                    <TableCell>{task.department}</TableCell>
+                    <TableCell>{task.machinePartName}</TableCell>
+                    <TableCell>
+                      <span
+                        className={`px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(
+                          task.priority
+                        )}`}
+                      >
+                        {task.priority}
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
 
             {loadingTasks && (
               <div className="flex flex-col items-center justify-center w-[75vw] mt-10">
@@ -386,30 +432,32 @@ const SentMachine = () => {
         )}
 
         {activeTab === "history" && (
-          <div>
+          <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-250px)]">
             <Table>
-              <TableHeader>
-                <TableHead>Task Number</TableHead>
-                <TableHead>Planned Date</TableHead>
-                <TableHead>Serial No</TableHead>
-                <TableHead>Machine Name</TableHead>
-                <TableHead>Indenter</TableHead>
-                {/* to do */}
+              <TableHeader className="sticky top-0 z-10">
+                <TableRow>
+                  <TableHead>Task Number</TableHead>
+                  <TableHead>Planned Date</TableHead>
+                  <TableHead>Serial No</TableHead>
+                  <TableHead>Machine Name</TableHead>
+                  <TableHead>Indenter</TableHead>
+                  {/* to do */}
 
-                <TableHead>Part Name</TableHead>
-                <TableHead>Vendor Name</TableHead>
-                <TableHead>Lead Time</TableHead>
-                <TableHead>Transpoter Name</TableHead>
-                <TableHead>Transportation Charges</TableHead>
-                <TableHead>Weighment Slip</TableHead>
-                <TableHead>Transporting Image With Machine</TableHead>
-                <TableHead>Payment Type</TableHead>
-                <TableHead>How Much</TableHead>
+                  <TableHead>Part Name</TableHead>
+                  <TableHead>Vendor Name</TableHead>
+                  <TableHead>Lead Time</TableHead>
+                  <TableHead>Transpoter Name</TableHead>
+                  <TableHead>Transportation Charges</TableHead>
+                  <TableHead>Weighment Slip</TableHead>
+                  <TableHead>Transporting Image With Machine</TableHead>
+                  <TableHead>Payment Type</TableHead>
+                  <TableHead>How Much</TableHead>
 
-                <TableHead>Part Name</TableHead>
-                <TableHead>Vendor Name</TableHead>
-                <TableHead>Transporter</TableHead>
-                <TableHead>Transportation Charges</TableHead>
+                  <TableHead>Part Name</TableHead>
+                  <TableHead>Vendor Name</TableHead>
+                  <TableHead>Transporter</TableHead>
+                  <TableHead>Transportation Charges</TableHead>
+                </TableRow>
               </TableHeader>
               <TableBody>
                 {historyTasks.map((task) => (
@@ -510,8 +558,7 @@ const SentMachine = () => {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Vendor Name *
               </label>
-              <input
-                type="text"
+              <select
                 value={formData.vendorName}
                 onChange={(e) =>
                   setFormData((prev) => ({
@@ -521,7 +568,18 @@ const SentMachine = () => {
                 }
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+              >
+                <option value="">Select Vendor</option>
+                {loaderMasterSheetData ? (
+                  <option disabled>Loading vendors...</option>
+                ) : (
+                  vendorData.map((vendor, index) => (
+                    <option key={index} value={vendor}>
+                      {vendor}
+                    </option>
+                  ))
+                )}
+              </select>
             </div>
 
             <div>

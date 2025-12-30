@@ -264,71 +264,77 @@ const RepairAdvance = () => {
         </div>
 
         {activeTab === "pending" && (
-          <div>
-            <Table>
-              <TableHeader>
-                <TableHead>Action</TableHead>
-                <TableHead>Task Number</TableHead>
-                <TableHead>Machine Name</TableHead>
-                <TableHead>Part Name</TableHead>
-                <TableHead>Vendor Name</TableHead>
-                <TableHead>Received Qty</TableHead>
-                <TableHead>Bill Match</TableHead>
-              </TableHeader>
-              <TableBody>
-                {pendingTasks.map((task) => (
-                  <TableRow key={task.taskNo}>
-                    <TableCell>
-                      <Button
-                        size="sm"
-                        onClick={() => handleMaterialClick(task)}
-                        className="flex items-center"
-                      >
-                        <CreditCard className="w-3 h-3 mr-1" />
-                        Material
-                      </Button>
-                    </TableCell>
-                    <TableCell className="font-medium text-blue-600">
-                      {task.taskNo}
-                    </TableCell>
-                    <TableCell>{task.machineName}</TableCell>
-                    <TableCell>{task.machinePartName}</TableCell>
-                    <TableCell>{task.vendorName || "-"}</TableCell>
-                    <TableCell>{task.receivedQuantity || "-"}</TableCell>
-                    <TableCell>
-                      <span
-                        className={`px-2 py-1 text-xs font-medium rounded-full ${task.billMatch
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                          }`}
-                      >
-                        {task.billMatch ? "Matched" : "Not Matched"}
-                      </span>
-                    </TableCell>
+          <>
+            <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-250px)]">
+              <Table>
+                <TableHeader className="sticky top-0 z-10">
+                  <TableRow>
+                    <TableHead>Action</TableHead>
+                    <TableHead>Task Number</TableHead>
+                    <TableHead>Machine Name</TableHead>
+                    <TableHead>Part Name</TableHead>
+                    <TableHead>Vendor Name</TableHead>
+                    <TableHead>Received Qty</TableHead>
+                    <TableHead>Bill Match</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {pendingTasks.map((task) => (
+                    <TableRow key={task.taskNo}>
+                      <TableCell>
+                        <Button
+                          size="sm"
+                          onClick={() => handleMaterialClick(task)}
+                          className="flex items-center"
+                        >
+                          <CreditCard className="w-3 h-3 mr-1" />
+                          Material
+                        </Button>
+                      </TableCell>
+                      <TableCell className="font-medium text-blue-600">
+                        {task.taskNo}
+                      </TableCell>
+                      <TableCell>{task.machineName}</TableCell>
+                      <TableCell>{task.machinePartName}</TableCell>
+                      <TableCell>{task.vendorName || "-"}</TableCell>
+                      <TableCell>{task.receivedQuantity || "-"}</TableCell>
+                      <TableCell>
+                        <span
+                          className={`px-2 py-1 text-xs font-medium rounded-full ${task.billMatch
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                            }`}
+                        >
+                          {task.billMatch ? "Matched" : "Not Matched"}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
             {loadingTasks && (
               <div className="flex flex-col items-center justify-center w-[75vw] mt-10">
                 <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                 <p className="mt-4 text-gray-600">Loading tasks...</p>
               </div>
             )}
-          </div>
+          </>
         )}
 
         {activeTab === "history" && (
-          <div>
+          <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-250px)]">
             <Table>
-              <TableHeader>
-                <TableHead>Task Number</TableHead>
-                <TableHead>Machine Name</TableHead>
-                <TableHead>Part Name</TableHead>
-                <TableHead>Vendor Name</TableHead>
-                <TableHead>Total Amount</TableHead>
-                <TableHead>Payment Type</TableHead>
-                <TableHead>To Be Paid</TableHead>
+              <TableHeader className="sticky top-0 z-10">
+                <TableRow>
+                  <TableHead>Task Number</TableHead>
+                  <TableHead>Machine Name</TableHead>
+                  <TableHead>Part Name</TableHead>
+                  <TableHead>Vendor Name</TableHead>
+                  <TableHead>Total Amount</TableHead>
+                  <TableHead>Payment Type</TableHead>
+                  <TableHead>To Be Paid</TableHead>
+                </TableRow>
               </TableHeader>
               <TableBody>
                 {historyTasks.map((task) => (
@@ -479,7 +485,7 @@ const RepairAdvance = () => {
           </div>
         </form>
       </Modal>
-    </div>
+    </div >
   );
 };
 

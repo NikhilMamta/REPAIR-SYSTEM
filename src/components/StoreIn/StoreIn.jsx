@@ -353,73 +353,77 @@ const StoreIn = () => {
                 <p className="text-gray-500">No pending tasks found</p>
               </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableHead>Action</TableHead>
-                  <TableHead>Task Number</TableHead>
-                  <TableHead>Machine Name</TableHead>
-                  <TableHead>Serial No</TableHead>
-                  <TableHead>Planned Date</TableHead>
-                  <TableHead>Indenter</TableHead>
-                  <TableHead>Vendor Name</TableHead>
-                  <TableHead>Lead Time</TableHead>
-                  <TableHead>Payment Type</TableHead>
-                  <TableHead>Transporter Amount</TableHead>
-                  <TableHead>Bill Image</TableHead>
-                  <TableHead>Bill No</TableHead>
-                  <TableHead>Total Bill Amount</TableHead>
-                  <TableHead>To Be Paid</TableHead>
-                </TableHeader>
-                <TableBody>
-                  {filteredPendingTasks.map((task) => (
-                    <TableRow key={task.id || task.taskNo}>
-                      <TableCell>
-                        <Button
-                          size="sm"
-                          onClick={() => handleMaterialClick(task)}
-                          className="flex items-center"
-                        >
-                          <Package className="w-3 h-3 mr-1" />
-                          Material
-                        </Button>
-                      </TableCell>
-                      <TableCell className="font-medium text-blue-600">
-                        {task.taskNo || "-"}
-                      </TableCell>
-                      <TableCell>{task.machineName || "-"}</TableCell>
-                      <TableCell>{task.serialNo || "-"}</TableCell>
-                      <TableCell>{task.planned2 || "-"}</TableCell>
-                      <TableCell>{task.doerName || "-"}</TableCell>
-                      <TableCell>{task.vendorName || "-"}</TableCell>
-                      <TableCell>{task.leadTimeToDeliverDays || "-"}</TableCell>
-                      <TableCell>{task.paymentType || "-"}</TableCell>
-                      <TableCell>{task.howMuch || "-"}</TableCell>
-                      <TableCell>
-                        {task.billImage ? (
+              <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-250px)]">
+                <Table>
+                  <TableHeader className="sticky top-0 z-10">
+                    <TableRow>
+                      <TableHead>Action</TableHead>
+                      <TableHead>Task Number</TableHead>
+                      <TableHead>Machine Name</TableHead>
+                      <TableHead>Serial No</TableHead>
+                      <TableHead>Planned Date</TableHead>
+                      <TableHead>Indenter</TableHead>
+                      <TableHead>Vendor Name</TableHead>
+                      <TableHead>Lead Time</TableHead>
+                      <TableHead>Payment Type</TableHead>
+                      <TableHead>Transporter Amount</TableHead>
+                      <TableHead>Bill Image</TableHead>
+                      <TableHead>Bill No</TableHead>
+                      <TableHead>Total Bill Amount</TableHead>
+                      <TableHead>To Be Paid</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredPendingTasks.map((task) => (
+                      <TableRow key={task.id || task.taskNo}>
+                        <TableCell>
                           <Button
                             size="sm"
-                            variant="primary"
-                            onClick={() => window.open(task.billImage, "_blank")}
+                            onClick={() => handleMaterialClick(task)}
+                            className="flex items-center"
                           >
-                            View
+                            <Package className="w-3 h-3 mr-1" />
+                            Material
                           </Button>
-                        ) : (
-                          "-"
-                        )}
-                      </TableCell>
-                      <TableCell>{task.billNo || "-"}</TableCell>
-                      <TableCell>{formatCurrency(task.totalBillAmount)}</TableCell>
-                      <TableCell>{formatCurrency(task.toBePaidAmount)}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                        </TableCell>
+                        <TableCell className="font-medium text-blue-600">
+                          {task.taskNo || "-"}
+                        </TableCell>
+                        <TableCell>{task.machineName || "-"}</TableCell>
+                        <TableCell>{task.serialNo || "-"}</TableCell>
+                        <TableCell>{task.planned2 || "-"}</TableCell>
+                        <TableCell>{task.doerName || "-"}</TableCell>
+                        <TableCell>{task.vendorName || "-"}</TableCell>
+                        <TableCell>{task.leadTimeToDeliverDays || "-"}</TableCell>
+                        <TableCell>{task.paymentType || "-"}</TableCell>
+                        <TableCell>{task.howMuch || "-"}</TableCell>
+                        <TableCell>
+                          {task.billImage ? (
+                            <Button
+                              size="sm"
+                              variant="primary"
+                              onClick={() => window.open(task.billImage, "_blank")}
+                            >
+                              View
+                            </Button>
+                          ) : (
+                            "-"
+                          )}
+                        </TableCell>
+                        <TableCell>{task.billNo || "-"}</TableCell>
+                        <TableCell>{formatCurrency(task.totalBillAmount)}</TableCell>
+                        <TableCell>{formatCurrency(task.toBePaidAmount)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             )}
           </div>
         )}
 
         {activeTab === "history" && (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-250px)]">
             {loadingTasks ? (
               <div className="flex flex-col items-center justify-center py-12">
                 <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
@@ -431,17 +435,19 @@ const StoreIn = () => {
               </div>
             ) : (
               <Table>
-                <TableHeader>
-                  <TableHead>Task Number</TableHead>
-                  <TableHead>Machine Name</TableHead>
-                  <TableHead>Serial No</TableHead>
-                  <TableHead>Part Name</TableHead>
-                  <TableHead>Vendor Name</TableHead>
-                  <TableHead>Received Quantity</TableHead>
-                  <TableHead>Bill Image</TableHead>
-                  <TableHead>Bill Amount</TableHead>
-                  <TableHead>To Be Paid</TableHead>
-                  <TableHead>Bill Match</TableHead>
+                <TableHeader className="sticky top-0 z-10">
+                  <TableRow>
+                    <TableHead>Task Number</TableHead>
+                    <TableHead>Machine Name</TableHead>
+                    <TableHead>Serial No</TableHead>
+                    <TableHead>Part Name</TableHead>
+                    <TableHead>Vendor Name</TableHead>
+                    <TableHead>Received Quantity</TableHead>
+                    <TableHead>Bill Image</TableHead>
+                    <TableHead>Bill Amount</TableHead>
+                    <TableHead>To Be Paid</TableHead>
+                    <TableHead>Bill Match</TableHead>
+                  </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredHistoryTasks.map((task) => (

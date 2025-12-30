@@ -547,24 +547,26 @@ const MakePayment = () => {
 
 
         {activeTab === "pending" && (
-          <div>
+          <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-250px)]">
             <Table>
-              <TableHeader>
-                <TableHead>Action</TableHead>
-                <TableHead>Task Number</TableHead>
-                <TableHead>Machine Name</TableHead>
-                <TableHead>Serial No</TableHead>
+              <TableHeader className="sticky top-0 z-10">
+                <TableRow>
+                  <TableHead>Action</TableHead>
+                  <TableHead>Task Number</TableHead>
+                  <TableHead>Machine Name</TableHead>
+                  <TableHead>Serial No</TableHead>
 
-                <TableHead>Planned Date</TableHead>
-                <TableHead>Indenter</TableHead>
-                <TableHead>Vendor Name</TableHead>
-                <TableHead>Lead Time</TableHead>
-                <TableHead>Payment Type</TableHead>
-                <TableHead>Transpoter Amount</TableHead>
-                <TableHead>Bill Image</TableHead>
-                <TableHead>Bill No</TableHead>
-                <TableHead>Total Bill Amount</TableHead>
-                <TableHead>To Be Paid</TableHead>
+                  <TableHead>Planned Date</TableHead>
+                  <TableHead>Indenter</TableHead>
+                  <TableHead>Vendor Name</TableHead>
+                  <TableHead>Lead Time</TableHead>
+                  <TableHead>Payment Type</TableHead>
+                  <TableHead>Transpoter Amount</TableHead>
+                  <TableHead>Bill Image</TableHead>
+                  <TableHead>Bill No</TableHead>
+                  <TableHead>Total Bill Amount</TableHead>
+                  <TableHead>To Be Paid</TableHead>
+                </TableRow>
               </TableHeader>
               <TableBody>
                 {pendingRepairPayments.map((task) => (
@@ -639,24 +641,26 @@ const MakePayment = () => {
         )}
 
         {activeTab === "history" && (
-          <div>
+          <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-250px)]">
             <Table>
-              <TableHeader>
-                <TableHead>Payment No.</TableHead>
-                <TableHead>Repair Task No.</TableHead>
+              <TableHeader className="sticky top-0 z-10">
+                <TableRow>
+                  <TableHead>Payment No.</TableHead>
+                  <TableHead>Repair Task No.</TableHead>
 
-                <TableHead>Serial No</TableHead>
+                  <TableHead>Serial No</TableHead>
 
-                <TableHead>Machine Name</TableHead>
-                <TableHead>Vendor Name</TableHead>
+                  <TableHead>Machine Name</TableHead>
+                  <TableHead>Vendor Name</TableHead>
 
-                <TableHead>Bill No.</TableHead>
+                  <TableHead>Bill No.</TableHead>
 
-                <TableHead>Total Bill Amount</TableHead>
-                <TableHead>Payment Type</TableHead>
-                <TableHead>To Be Paid Amount</TableHead>
+                  <TableHead>Total Bill Amount</TableHead>
+                  <TableHead>Payment Type</TableHead>
+                  <TableHead>To Be Paid Amount</TableHead>
 
-                <TableHead>Bill Match</TableHead>
+                  <TableHead>Bill Match</TableHead>
+                </TableRow>
               </TableHeader>
               <TableBody>
                 {historyRepairPayments.map((task, index) => (

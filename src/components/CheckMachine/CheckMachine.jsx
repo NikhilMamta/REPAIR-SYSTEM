@@ -295,23 +295,25 @@ const CheckMachine = () => {
         </div>
 
         {activeTab === "pending" && (
-          <div>
+          <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-250px)]">
             <Table>
-              <TableHeader>
-                <TableHead>Action</TableHead>
-                <TableHead>Task Number</TableHead>
-                <TableHead>Machine Name</TableHead>
+              <TableHeader className="sticky top-0 z-10">
+                <TableRow>
+                  <TableHead>Action</TableHead>
+                  <TableHead>Task Number</TableHead>
+                  <TableHead>Machine Name</TableHead>
 
-                <TableHead>Planned Date</TableHead>
+                  <TableHead>Planned Date</TableHead>
 
-                <TableHead>Serial No</TableHead>
-                <TableHead>Indenter</TableHead>
+                  <TableHead>Serial No</TableHead>
+                  <TableHead>Indenter</TableHead>
 
-                <TableHead>Vendor</TableHead>
-                <TableHead>Transpoter Charges</TableHead>
-                <TableHead>Lead Time</TableHead>
-                <TableHead>Payment Type</TableHead>
-                <TableHead>How Much</TableHead>
+                  <TableHead>Vendor</TableHead>
+                  <TableHead>Transpoter Charges</TableHead>
+                  <TableHead>Lead Time</TableHead>
+                  <TableHead>Payment Type</TableHead>
+                  <TableHead>How Much</TableHead>
+                </TableRow>
               </TableHeader>
               <TableBody>
                 {pendingRepairTasks.map((task) => (
@@ -355,27 +357,29 @@ const CheckMachine = () => {
         )}
 
         {activeTab === "history" && (
-          <div>
+          <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-250px)]">
             <Table>
-              <TableHeader>
-                <TableHead>Task Number</TableHead>
-                <TableHead>Machine Name</TableHead>
+              <TableHeader className="sticky top-0 z-10">
+                <TableRow>
+                  <TableHead>Task Number</TableHead>
+                  <TableHead>Machine Name</TableHead>
 
-                <TableHead>Serial No</TableHead>
-                <TableHead>Planned Date</TableHead>
-                <TableHead>Indenter</TableHead>
-                <TableHead>Vendor Name</TableHead>
-                <TableHead>Lead Time</TableHead>
-                <TableHead>Payment Type</TableHead>
-                <TableHead>How Much</TableHead>
-                <TableHead>Transporter Name</TableHead>
+                  <TableHead>Serial No</TableHead>
+                  <TableHead>Planned Date</TableHead>
+                  <TableHead>Indenter</TableHead>
+                  <TableHead>Vendor Name</TableHead>
+                  <TableHead>Lead Time</TableHead>
+                  <TableHead>Payment Type</TableHead>
+                  <TableHead>How Much</TableHead>
+                  <TableHead>Transporter Name</TableHead>
 
 
-                <TableHead>Total Amount</TableHead>
-                <TableHead>Bill No</TableHead>
-                <TableHead>Bill Type</TableHead>
-                <TableHead>To Be Paid</TableHead>
-                <TableHead>Bill Image</TableHead>
+                  <TableHead>Total Amount</TableHead>
+                  <TableHead>Bill No</TableHead>
+                  <TableHead>Bill Type</TableHead>
+                  <TableHead>To Be Paid</TableHead>
+                  <TableHead>Bill Image</TableHead>
+                </TableRow>
               </TableHeader>
               <TableBody>
                 {historyRepairTasks.map((task) => (

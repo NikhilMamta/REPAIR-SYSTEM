@@ -203,100 +203,94 @@ const Indent = () => {
           </div>
         </div>
 
-        <div className="relative overflow-hidden">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader className="bg-white">
+        <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-250px)]">
+          <Table>
+            <TableHeader className="sticky top-0 z-10">
+              <TableRow>
+                <TableHead className="min-w-[120px] whitespace-nowrap">Task Number</TableHead>
+                <TableHead className="min-w-[150px]">Machine Name</TableHead>
+                <TableHead className="min-w-[120px]">Serial No</TableHead>
+                <TableHead className="min-w-[120px]">Doer</TableHead>
+                <TableHead className="min-w-[120px]">Department</TableHead>
+                <TableHead className="min-w-[160px]">Machine Part Name</TableHead>
+                <TableHead className="min-w-[100px]">Priority</TableHead>
+                <TableHead className="min-w-[110px]">Start Date</TableHead>
+                <TableHead className="min-w-[110px]">End Date</TableHead>
+                <TableHead className="min-w-[100px]">Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loadingTasks ? (
                 <TableRow>
-                  <TableHead className="min-w-[120px] whitespace-nowrap">Task Number</TableHead>
-                  <TableHead className="min-w-[150px]">Machine Name</TableHead>
-                  <TableHead className="min-w-[120px]">Serial No</TableHead>
-                  <TableHead className="min-w-[120px]">Doer</TableHead>
-                  <TableHead className="min-w-[120px]">Department</TableHead>
-                  <TableHead className="min-w-[160px]">Machine Part Name</TableHead>
-                  <TableHead className="min-w-[100px]">Priority</TableHead>
-                  <TableHead className="min-w-[110px]">Start Date</TableHead>
-                  <TableHead className="min-w-[110px]">End Date</TableHead>
-                  <TableHead className="min-w-[100px]">Status</TableHead>
+                  <TableCell colSpan={10} className="text-center py-8">
+                    <div className="flex flex-col items-center justify-center">
+                      <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                      <p className="mt-4 text-gray-600">Loading tasks...</p>
+                    </div>
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-            </Table>
-          </div>
-          <div className="overflow-x-auto max-h-[calc(100vh-200px)] overflow-y-auto">
-            <Table>
-              <TableBody>
-                {loadingTasks ? (
-                  <TableRow>
-                    <TableCell colSpan={10} className="text-center py-8">
-                      <div className="flex flex-col items-center justify-center">
-                        <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                        <p className="mt-4 text-gray-600">Loading tasks...</p>
+              ) : filteredTasks.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={10} className="text-center py-8">
+                    <p className="text-gray-500">No tasks found</p>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredTasks.map((task) => (
+                  <TableRow key={task.id || task.taskNo || Math.random()} className="hover:bg-gray-50">
+                    <TableCell className="font-medium text-blue-600 min-w-[120px] whitespace-nowrap">
+                      {task.taskNo || "N/A"}
+                    </TableCell>
+                    <TableCell className="min-w-[150px]">
+                      <div className="break-words" title={task.machineName || ""}>
+                        {truncateText(task.machineName, 25)}
                       </div>
                     </TableCell>
-                  </TableRow>
-                ) : filteredTasks.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={10} className="text-center py-8">
-                      <p className="text-gray-500">No tasks found</p>
+                    <TableCell className="min-w-[120px]">
+                      <div className="break-words" title={task.serialNo || ""}>
+                        {truncateText(task.serialNo, 15)}
+                      </div>
+                    </TableCell>
+                    <TableCell className="min-w-[120px]">
+                      <div className="break-words" title={task.doerName || ""}>
+                        {truncateText(task.doerName, 15)}
+                      </div>
+                    </TableCell>
+                    <TableCell className="min-w-[120px]">
+                      <div className="break-words" title={task.department || ""}>
+                        {truncateText(task.department, 15)}
+                      </div>
+                    </TableCell>
+                    <TableCell className="min-w-[160px]">
+                      <div className="break-words" title={task.machinePartName || ""}>
+                        {truncateText(task.machinePartName, 20)}
+                      </div>
+                    </TableCell>
+                    <TableCell className="min-w-[100px]">
+                      <span
+                        className={`px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap ${getPriorityColor(
+                          task.priority
+                        )}`}
+                      >
+                        {task.priority || "N/A"}
+                      </span>
+                    </TableCell>
+                    <TableCell className="min-w-[110px] whitespace-nowrap">
+                      {formatDate(task.taskStartDate)}
+                    </TableCell>
+                    <TableCell className="min-w-[110px] whitespace-nowrap">
+                      {formatDate(task.taskEndDate)}
+                    </TableCell>
+                    <TableCell className="min-w-[100px]">
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full capitalize whitespace-nowrap ${getStatusColor(task.status)}`}>
+                        {task.status || "N/A"}
+                      </span>
                     </TableCell>
                   </TableRow>
-                ) : (
-                  filteredTasks.map((task) => (
-                    <TableRow key={task.id || task.taskNo || Math.random()} className="hover:bg-gray-50">
-                      <TableCell className="font-medium text-blue-600 min-w-[120px] whitespace-nowrap">
-                        {task.taskNo || "N/A"}
-                      </TableCell>
-                      <TableCell className="min-w-[150px]">
-                        <div className="break-words" title={task.machineName || ""}>
-                          {truncateText(task.machineName, 25)}
-                        </div>
-                      </TableCell>
-                      <TableCell className="min-w-[120px]">
-                        <div className="break-words" title={task.serialNo || ""}>
-                          {truncateText(task.serialNo, 15)}
-                        </div>
-                      </TableCell>
-                      <TableCell className="min-w-[120px]">
-                        <div className="break-words" title={task.doerName || ""}>
-                          {truncateText(task.doerName, 15)}
-                        </div>
-                      </TableCell>
-                      <TableCell className="min-w-[120px]">
-                        <div className="break-words" title={task.department || ""}>
-                          {truncateText(task.department, 15)}
-                        </div>
-                      </TableCell>
-                      <TableCell className="min-w-[160px]">
-                        <div className="break-words" title={task.machinePartName || ""}>
-                          {truncateText(task.machinePartName, 20)}
-                        </div>
-                      </TableCell>
-                      <TableCell className="min-w-[100px]">
-                        <span
-                          className={`px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap ${getPriorityColor(
-                            task.priority
-                          )}`}
-                        >
-                          {task.priority || "N/A"}
-                        </span>
-                      </TableCell>
-                      <TableCell className="min-w-[110px] whitespace-nowrap">
-                        {formatDate(task.taskStartDate)}
-                      </TableCell>
-                      <TableCell className="min-w-[110px] whitespace-nowrap">
-                        {formatDate(task.taskEndDate)}
-                      </TableCell>
-                      <TableCell className="min-w-[100px]">
-                        <span className={`px-2 py-1 text-xs font-medium rounded-full capitalize whitespace-nowrap ${getStatusColor(task.status)}`}>
-                          {task.status || "N/A"}
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
+                ))
+              )}
+            </TableBody>
+          </Table>
         </div>
       </div>
 
