@@ -67,14 +67,7 @@ const Indent = () => {
 
         // Get status from column AU (index 46)
         const statusValue = getCellValue(46);
-        let status;
-        if (statusValue.toLowerCase() === "complete") {
-          status = "Complete";
-        } else if (statusValue.toLowerCase() === "pending") {
-          status = "Pending";
-        } else {
-          status = "Pending"; // Default to Pending if blank or any other value
-        }
+        const status = statusValue || "Pending"; // Default to Pending only if empty
 
         return {
           id: `task-${index}`, // Add unique id for React keys
